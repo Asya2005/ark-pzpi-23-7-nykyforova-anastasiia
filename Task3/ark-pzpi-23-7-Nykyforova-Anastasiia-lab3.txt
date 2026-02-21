@@ -1,0 +1,847 @@
+Міністерство освіти і науки України
+Харківський національний університет радіоелектроніки
+Кафедра програмної інженерії
+
+Звіт
+з лабораторної роботи №3
+з дисципліни «Аналіз та рефакторінг коду»
+на тему «РОЗРОБКА БІЗНЕС-ЛОГІКИ ТА ФУНКЦІЙ АДМІНІСТРУВАННЯ
+СЕРВЕРНОЇ ЧАСТИНИ ПРОГРАМНОЇ СИСТЕМИ »
+
+Виконала:
+
+Перевірив:
+
+ст. гр. ПЗПІ 23-7
+
+Дашенков Д. С.
+
+Никифорова Анастасія
+Дмитрівна
+
+Харків 2025
+
+1.
+
+Опис інженерних рішень
+
+1.1 Архітектура серверної частини
+Серверна частина програмної системи для медичного страхування
+тварин реалізована за клієнт-серверною архітектурою та забезпечує обробку
+запитів користувачів, виконання бізнес-логіки та взаємодію з базою даних.
+Система побудована з використанням платформи Node.js та вебфреймворку Express, що забезпечує обробку HTTP-запитів і реалізацію REST
+API.
+Для зберігання даних використовується Microsoft SQL Server Express,
+підключення до якого здійснюється через драйвер ODBC.
+Архітектура серверної частини включає такі компоненти:
+API рівень — приймає HTTP-запити та повертає відповіді у форматі
+JSON;
+бізнес-логіка — реалізує правила обробки страхових випадків та
+перевірку даних;
+рівень доступу до даних — забезпечує взаємодію з базою даних через
+SQL-запити;
+документація API — реалізована за допомогою Swagger UI.
+Така архітектура забезпечує масштабованість, зрозумілу структуру
+коду та спрощує подальший розвиток системи.
+
+Рисунок 1.1 – Документація REST API серверної частини системи
+
+1.2 Використані технології
+Під час розробки серверної частини програмної системи були
+використані такі технології:
+Node.js — серверна платформа для виконання JavaScript;
+Express.js — фреймворк для створення REST API;
+Microsoft SQL Server Express — система керування базами даних;
+ODBC Driver 18 for SQL Server — драйвер підключення до БД;
+Swagger UI (OpenAPI) — документування та тестування API;
+JSON — формат обміну даними між клієнтом та сервером.
+Використання цих технологій дозволяє створити надійну,
+масштабовану та легко підтримувану серверну систему.
+
+Рисунок 1.2 – Запуск серверної частини системи та підключення до бази
+даних
+
+1.3 Бізнес-логіка серверної частини
+Серверна частина має модульну структуру, що забезпечує логічний
+розподіл функціональності.
+Основні компоненти структури:
+server.js — головний файл запуску сервера та опис API;
+db.js — модуль підключення до бази даних;
+services/ — модулі бізнес-логіки (перевірка активності полісів, зміна
+статусів заявок);
+swagger.json — опис REST API.
+Така структура дозволяє відокремити бізнес-логіку від обробки HTTPзапитів і забезпечує зручність підтримки коду.
+
+Рисунок 1.3 – Структура серверної частини програмної системи
+
+1.4 Функціональні можливості серверної частини
+Серверна частина системи забезпечує реалізацію основних функцій
+управління медичним страхуванням тварин:
+реєстрація користувачів системи;
+
+створення профілів тварин;
+керування страховими компаніями;
+оформлення страхових полісів;
+створення страхових випадків;
+зміна статусів страхових заявок;
+додавання документів до заявок;
+перегляд довідників ролей та статусів.
+Реалізовані функції забезпечують повний цикл роботи зі страховими
+випадками — від створення заявки до прийняття рішення страховою
+компанією.
+
+Рисунок 1.4 – Функціональні можливості REST API системи
+
+1.5 Бізнес-логіка серверної частини
+Одним із ключових бізнес-правил системи є перевірка активності
+страхового поліса перед створенням страхового випадку.
+Перед додаванням нового страхового випадку система перевіряє:
+чи існує поліс;
+чи дата початку поліса вже настала;
+чи термін дії поліса не завершився.
+Якщо поліс неактивний або термін його дії закінчився, система
+повертає помилку і забороняє створення страхового випадку.
+Це правило запобігає реєстрації заявок за недійсними страховими
+полісами.
+
+Рисунок 1.5 – Перевірка активності страхового поліса під час створення
+страхового випадку
+
+Рисунок 1.6 – Успішне створення страхового випадку для активного поліса
+
+1.5.2 Контроль переходів статусів страхового випадку
+Для забезпечення коректної обробки страхових випадків у системі
+реалізовано контроль переходів між статусами заявок.
+Кожен страховий випадок може змінювати статус лише відповідно до
+дозволених переходів:
+NEW → IN_REVIEW або REJECTED
+IN_REVIEW → APPROVED або REJECTED
+APPROVED → PAID
+Якщо спробувати виконати недопустимий перехід статусу, система
+повертає помилку.
+Це правило забезпечує логічну послідовність обробки страхових
+випадків та запобігає некоректним змінам статусів.
+
+Рисунок 1.7 – Виявлення недопустимого переходу статусу страхового
+випадку
+
+Рисунок 1.8 – Успішна зміна статусу страхового випадку
+
+1.6 Функції адміністрування серверної частини
+Серверна частина системи забезпечує функції адміністрування, що
+дозволяють контролювати довідкові дані та процес обробки страхових
+випадків.
+До функцій адміністрування належать:
+перегляд ролей користувачів;
+перегляд статусів страхових випадків;
+контроль зміни статусів заявок;
+керування страховими випадками та документами.
+Наявність адміністративних функцій забезпечує контроль роботи
+системи та правильність обробки страхових випадків.
+
+Рисунок 1.9 – Перегляд довідкових даних системи
+
+2 ФРАГМЕНТИ ПРОГРАМНОГО КОДУ
+Перед створенням страхового випадку система перевіряє активність
+страхового поліса.
+Це забезпечує неможливість подання заявок за простроченими або
+недійсними полісами.
+const { getPool, sql } = require("../db");
+function isPolicyActive(policy) {
+const today = new Date();
+const start = new Date(policy.startDate);
+const end = new Date(policy.endDate);
+return start <= today && today <= end;
+}
+async function getPolicyById(policyId) {
+const pool = await getPool();
+const result = await pool.request()
+.input("policyId", sql.Int, policyId)
+.query(`
+
+SELECT id, policyNumber, startDate, endDate, coverageAmount, petId,
+insuranceCompanyId
+FROM Policy
+WHERE id = @policyId
+`);
+return result.recordset[0] || null;
+}
+async function assertPolicyActive(policyId) {
+const policy = await getPolicyById(policyId);
+if (!policy) {
+const err = new Error("Policy not found");
+err.status = 404;
+throw err;
+}
+if (!isPolicyActive(policy)) {
+const err = new Error("Policy is not active");
+err.status = 400;
+throw err;
+}
+return policy;
+}
+module.exports = {
+isPolicyActive,
+getPolicyById,
+assertPolicyActive,
+};
+
+У наведеному фрагменті коду реалізовано перевірку активності
+страхового поліса.
+Функція isPolicyActive() перевіряє, чи поточна дата входить у період
+дії поліса.
+Функція assertPolicyActive() отримує поліс із бази даних та генерує помилку,
+якщо поліс відсутній або неактивний.
+Це забезпечує коректність обробки страхових випадків.
+2.2 Використання перевірки при створенні страхового випадку
+Контроль переходів статусів страхового випадку
+
+const express = require("express");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger.json");
+const sql = require("mssql/msnodesqlv8");
+const app = express();
+app.use(express.json());
+const dbConfig = {
+server: "NASTYA\\SQLEXPRESS",
+database: "AnimalMedicalInsurance",
+driver: "msnodesqlv8",
+options: {
+trustedConnection: true,
+driver: "ODBC Driver 18 for SQL Server",
+trustServerCertificate: true
+}
+};
+const { getPool } = require("./src/db");
+const { assertPolicyActive } = require("./src/services/policy.service");
+const ALLOWED_TRANSITIONS = {
+NEW: ["IN_REVIEW", "REJECTED"],
+IN_REVIEW: ["APPROVED", "REJECTED"],
+APPROVED: ["PAID"],
+REJECTED: [],
+PAID: [],
+};
+function badRequest(res, message) {
+return res.status(400).json({ error: message });
+}
+function notFound(res, message) {
+return res.status(404).json({ error: message });
+}
+// Swagger
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// Health
+app.get("/health", (req, res) => res.json({ status: "ok" }));
+
+// GET Roles
+app.get("/api/roles", async (req, res) => {
+try {
+
+const p = await getPool();
+const result = await p.request().query("SELECT * FROM dbo.[Role] ORDER BY
+id");
+res.json(result.recordset);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+// GET Claim Statuses
+app.get("/api/claim-statuses", async (req, res) => {
+try {
+const p = await getPool();
+const result = await p.request().query("SELECT * FROM dbo.[ClaimStatus] ORDER
+BY id");
+res.json(result.recordset);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+/* USERS*/
+// POST create user
+app.post("/api/users", async (req, res) => {
+const { fullName, email, passwordHash, roleId } = req.body || {};
+if (!fullName || !email || !passwordHash || !roleId) {
+return badRequest(res, "fullName, email, passwordHash, roleId are required");
+}
+try {
+const p = await getPool();
+// role exists?
+const role = await p.request()
+.input("roleId", sql.Int, roleId)
+.query("SELECT id FROM dbo.[Role] WHERE id=@roleId");
+if (role.recordset.length === 0) return badRequest(res, "roleId not found");
+// email unique?
+const exists = await p.request()
+.input("email", sql.NVarChar, email)
+.query("SELECT id FROM dbo.[User] WHERE email=@email");
+if (exists.recordset.length > 0) return badRequest(res, "email already
+exists");
+const ins = await p.request()
+.input("fullName", sql.NVarChar, fullName)
+.input("email", sql.NVarChar, email)
+.input("passwordHash", sql.NVarChar, passwordHash)
+.input("roleId", sql.Int, roleId)
+
+.query(`
+INSERT INTO dbo.[User](fullName, email, passwordHash, roleId)
+OUTPUT INSERTED.*
+VALUES (@fullName, @email, @passwordHash, @roleId)
+`);
+res.status(201).json(ins.recordset[0]);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+// GET users (for demo)
+app.get("/api/users", async (req, res) => {
+try {
+const p = await getPool();
+const result = await p.request().query(`
+SELECT u.id, u.fullName, u.email, u.roleId, r.name AS roleName
+FROM dbo.[User] u
+JOIN dbo.[Role] r ON r.id = u.roleId
+ORDER BY u.id
+`);
+res.json(result.recordset);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+// GET user by id
+app.get("/api/users/:id", async (req, res) => {
+const id = Number(req.params.id);
+if (!Number.isInteger(id)) return badRequest(res, "id must be integer");
+try {
+const p = await getPool();
+const result = await p.request()
+.input("id", sql.Int, id)
+.query(`
+SELECT u.id, u.fullName, u.email, u.roleId, r.name AS roleName
+FROM dbo.[User] u
+JOIN dbo.[Role] r ON r.id = u.roleId
+WHERE u.id=@id
+`);
+if (result.recordset.length === 0) return notFound(res, "User not found");
+res.json(result.recordset[0]);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+
+/* PETS*/
+// POST create pet
+app.post("/api/pets", async (req, res) => {
+const { name, species, birthDate, ownerId } = req.body || {};
+if (!name || !species || !ownerId) {
+return badRequest(res, "name, species, ownerId are required");
+}
+try {
+const p = await getPool();
+// owner exists?
+const owner = await p.request()
+.input("ownerId", sql.Int, ownerId)
+.query("SELECT id FROM dbo.[User] WHERE id=@ownerId");
+if (owner.recordset.length === 0) return badRequest(res, "ownerId not
+found");
+const ins = await p.request()
+.input("name", sql.NVarChar, name)
+.input("species", sql.NVarChar, species)
+.input("birthDate", sql.Date, birthDate ? new Date(birthDate) : null)
+.input("ownerId", sql.Int, ownerId)
+.query(`
+INSERT INTO dbo.[Pet](name, species, birthDate, ownerId)
+OUTPUT INSERTED.*
+VALUES (@name, @species, @birthDate, @ownerId)
+`);
+res.status(201).json(ins.recordset[0]);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+// GET pets (optional filter by ownerId)
+app.get("/api/pets", async (req, res) => {
+const ownerId = req.query.ownerId ? Number(req.query.ownerId) : null;
+if (req.query.ownerId && !Number.isInteger(ownerId)) return badRequest(res,
+"ownerId must be integer");
+try {
+const p = await getPool();
+const r = await p.request();
+let q = `
+SELECT p.*, u.fullName AS ownerName
+FROM dbo.[Pet] p
+JOIN dbo.[User] u ON u.id = p.ownerId
+`;
+if (ownerId) {
+
+r.input("ownerId", sql.Int, ownerId);
+q += " WHERE p.ownerId=@ownerId";
+}
+q += " ORDER BY p.id";
+const result = await r.query(q);
+res.json(result.recordset);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+/* INSURANCE COMPANIES*/
+// POST company
+app.post("/api/companies", async (req, res) => {
+const { name, contactEmail } = req.body || {};
+if (!name) return badRequest(res, "name is required");
+try {
+const p = await getPool();
+const ins = await p.request()
+.input("name", sql.NVarChar, name)
+.input("contactEmail", sql.NVarChar, contactEmail || null)
+.query(`
+INSERT INTO dbo.[InsuranceCompany](name, contactEmail)
+OUTPUT INSERTED.*
+VALUES (@name, @contactEmail)
+`);
+res.status(201).json(ins.recordset[0]);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+// GET companies
+app.get("/api/companies", async (req, res) => {
+try {
+const p = await getPool();
+const result = await p.request().query("SELECT * FROM dbo.[InsuranceCompany]
+ORDER BY id");
+res.json(result.recordset);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+/* POLICIES*/
+// POST policy
+
+app.post("/api/policies", async (req, res) => {
+const { policyNumber, startDate, endDate, coverageAmount, petId,
+insuranceCompanyId } = req.body || {};
+if (!policyNumber || !startDate || !endDate || coverageAmount === undefined ||
+!petId || !insuranceCompanyId) {
+return badRequest(res, "policyNumber, startDate, endDate, coverageAmount,
+petId, insuranceCompanyId are required");
+}
+try {
+const p = await getPool();
+// pet exists?
+const pet = await p.request()
+.input("petId", sql.Int, petId)
+.query("SELECT id FROM dbo.[Pet] WHERE id=@petId");
+if (pet.recordset.length === 0) return badRequest(res, "petId not found");
+// company exists?
+const comp = await p.request()
+.input("cid", sql.Int, insuranceCompanyId)
+.query("SELECT id FROM dbo.[InsuranceCompany] WHERE id=@cid");
+if (comp.recordset.length === 0) return badRequest(res, "insuranceCompanyId
+not found");
+const ins = await p.request()
+.input("policyNumber", sql.NVarChar, policyNumber)
+.input("startDate", sql.Date, new Date(startDate))
+.input("endDate", sql.Date, new Date(endDate))
+.input("coverageAmount", sql.Decimal(12, 2), Number(coverageAmount))
+.input("petId", sql.Int, petId)
+.input("insuranceCompanyId", sql.Int, insuranceCompanyId)
+.query(`
+INSERT INTO dbo.[Policy](policyNumber, startDate, endDate,
+coverageAmount, petId, insuranceCompanyId)
+OUTPUT INSERTED.*
+VALUES (@policyNumber, @startDate, @endDate, @coverageAmount, @petId,
+@insuranceCompanyId)
+`);
+res.status(201).json(ins.recordset[0]);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+// GET policy by id
+app.get("/api/policies/:id", async (req, res) => {
+const id = Number(req.params.id);
+if (!Number.isInteger(id)) return badRequest(res, "id must be integer");
+
+try {
+const p = await getPool();
+const result = await p.request()
+.input("id", sql.Int, id)
+.query(`
+SELECT pol.*, pet.name AS petName, ic.name AS insuranceCompanyName
+FROM dbo.[Policy] pol
+JOIN dbo.[Pet] pet ON pet.id = pol.petId
+JOIN dbo.[InsuranceCompany] ic ON ic.id = pol.insuranceCompanyId
+WHERE pol.id=@id
+`);
+if (result.recordset.length === 0) return notFound(res, "Policy not found");
+res.json(result.recordset[0]);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+// GET policies by petId
+app.get("/api/pets/:petId/policies", async (req, res) => {
+const petId = Number(req.params.petId);
+if (!Number.isInteger(petId)) return badRequest(res, "petId must be integer");
+try {
+const p = await getPool();
+const result = await p.request()
+.input("petId", sql.Int, petId)
+.query(`
+SELECT pol.*, ic.name AS insuranceCompanyName
+FROM dbo.[Policy] pol
+JOIN dbo.[InsuranceCompany] ic ON ic.id = pol.insuranceCompanyId
+WHERE pol.petId=@petId
+ORDER BY pol.id
+`);
+res.json(result.recordset);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+/* CLAIMS*/
+// POST claim
+app.post("/api/claims", async (req, res) => {
+const { description, policyId, statusId } = req.body || {};
+if (!description || !policyId) {
+return badRequest(res, "description and policyId are required");
+}
+try {
+
+const p = await getPool();
+try {
+await assertPolicyActive(policyId);
+} catch (e) {
+return res.status(e.status || 400).json({ error: e.message });
+}
+let finalStatusId = statusId;
+if (!finalStatusId) {
+const st = await p.request().query("SELECT TOP 1 id FROM dbo.[ClaimStatus]
+WHERE name='NEW'");
+if (st.recordset.length === 0) return badRequest(res, "ClaimStatus NEW not
+found in DB");
+finalStatusId = st.recordset[0].id;
+} else {
+const st2 = await p.request()
+.input("sid", sql.Int, finalStatusId)
+.query("SELECT id FROM dbo.[ClaimStatus] WHERE id=@sid");
+if (st2.recordset.length === 0) return badRequest(res, "statusId not
+found");
+}
+const ins = await p.request()
+.input("description", sql.NVarChar, description)
+.input("policyId", sql.Int, policyId)
+.input("statusId", sql.Int, finalStatusId)
+.query(`
+INSERT INTO dbo.[Claim](description, policyId, statusId)
+OUTPUT INSERTED.*
+VALUES (@description, @policyId, @statusId)
+`);
+res.status(201).json(ins.recordset[0]);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+// GET claim by id
+app.get("/api/claims/:id", async (req, res) => {
+const id = Number(req.params.id);
+if (!Number.isInteger(id)) return badRequest(res, "id must be integer");
+try {
+const p = await getPool();
+const result = await p.request()
+.input("id", sql.Int, id)
+.query(`
+SELECT c.*, cs.name AS statusName
+FROM dbo.[Claim] c
+
+JOIN dbo.[ClaimStatus] cs ON cs.id = c.statusId
+WHERE c.id=@id
+`);
+if (result.recordset.length === 0) return notFound(res, "Claim not found");
+res.json(result.recordset[0]);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+// GET claims by policyId
+app.get("/api/policies/:policyId/claims", async (req, res) => {
+const policyId = Number(req.params.policyId);
+if (!Number.isInteger(policyId)) return badRequest(res, "policyId must be
+integer");
+try {
+const p = await getPool();
+const result = await p.request()
+.input("policyId", sql.Int, policyId)
+.query(`
+SELECT c.*, cs.name AS statusName
+FROM dbo.[Claim] c
+JOIN dbo.[ClaimStatus] cs ON cs.id = c.statusId
+WHERE c.policyId=@policyId
+ORDER BY c.id
+`);
+res.json(result.recordset);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+// PATCH claim status
+app.patch("/api/claims/:id/status", async (req, res) => {
+const id = Number(req.params.id);
+if (!Number.isInteger(id)) return badRequest(res, "id must be integer");
+const { newStatus } = req.body || {};
+if (!newStatus) return badRequest(res, "newStatus is required");
+try {
+const p = await getPool();
+// claim exists?
+const c = await p.request()
+.input("id", sql.Int, id)
+.query("SELECT id FROM dbo.[Claim] WHERE id=@id");
+if (c.recordset.length === 0) return notFound(res, "Claim not found");
+
+const cur = await p.request()
+.input("id", sql.Int, id)
+.query(`
+SELECT cs.name AS statusName
+FROM dbo.[Claim] c
+JOIN dbo.[ClaimStatus] cs ON cs.id = c.statusId
+WHERE c.id = @id
+`);
+const currentStatus = cur.recordset[0].statusName;
+if (cur.recordset.length === 0) {
+return res.status(500).json({ error: "Current claim status not found" });
+}
+
+const allowed = ALLOWED_TRANSITIONS[currentStatus] || [];
+if (!allowed.includes(newStatus)) {
+return badRequest(res, `Invalid transition: ${currentStatus} ->
+${newStatus}`);
+}
+const st = await p.request()
+.input("name", sql.NVarChar, newStatus)
+.query("SELECT id FROM dbo.[ClaimStatus] WHERE name=@name");
+if (st.recordset.length === 0) return badRequest(res, "newStatus not found");
+const statusId = st.recordset[0].id;
+// update
+const upd = await p.request()
+.input("id", sql.Int, id)
+.input("statusId", sql.Int, statusId)
+.query(`
+UPDATE dbo.[Claim]
+SET statusId=@statusId
+OUTPUT INSERTED.*
+WHERE id=@id
+`);
+res.json(upd.recordset[0]);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+
+/* DOCUMENTS*/
+// POST add document to claim
+
+app.post("/api/claims/:claimId/documents", async (req, res) => {
+const claimId = Number(req.params.claimId);
+const { fileName, filePath } = req.body || {};
+if (!Number.isInteger(claimId)) return badRequest(res, "claimId must be
+integer");
+if (!fileName || !filePath) return badRequest(res, "fileName and filePath are
+required");
+try {
+const p = await getPool();
+// claim exists?
+const c = await p.request()
+.input("claimId", sql.Int, claimId)
+.query("SELECT id FROM dbo.[Claim] WHERE id=@claimId");
+if (c.recordset.length === 0) return badRequest(res, "Claim not found");
+const ins = await p.request()
+.input("fileName", sql.NVarChar, fileName)
+.input("filePath", sql.NVarChar, filePath)
+.input("claimId", sql.Int, claimId)
+.query(`
+INSERT INTO dbo.[Document](fileName, filePath, claimId)
+OUTPUT INSERTED.*
+VALUES (@fileName, @filePath, @claimId)
+`);
+res.status(201).json(ins.recordset[0]);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+// GET documents by claimId
+app.get("/api/claims/:claimId/documents", async (req, res) => {
+const claimId = Number(req.params.claimId);
+if (!Number.isInteger(claimId)) return badRequest(res, "claimId must be
+integer");
+try {
+const p = await getPool();
+const result = await p.request()
+.input("claimId", sql.Int, claimId)
+.query("SELECT * FROM dbo.[Document] WHERE claimId=@claimId ORDER BY id");
+res.json(result.recordset);
+} catch (err) {
+res.status(500).json({ error: err.message });
+}
+});
+/* START*/
+
+async function start() {
+try {
+await getPool();
+console.log("✅ Connected to SQL Server");
+app.listen(3000, () => {
+console.log("✅ Server: http://localhost:3000");
+console.log("✅ Swagger: http://localhost:3000/api-docs");
+});
+} catch (err) {
+console.error("❌ DB connection failed:", err);
+process.exit(1);
+}
+}
+app.get("/api/admin/health", async (req, res) => {
+try {
+const p = await getPool();
+await p.request().query("SELECT 1 AS ok");
+res.json({ status: "ok", db: "ok" });
+} catch (e) {
+res.status(500).json({ status: "error", db: "error", message: e.message });
+}
+});
+
+app.get("/api/admin/stats", async (req, res) => {
+try {
+const p = await getPool();
+const users = await p.request().query("SELECT COUNT(*) AS cnt FROM
+dbo.[User]");
+const pets = await p.request().query("SELECT COUNT(*) AS cnt FROM
+dbo.[Pet]");
+const policies = await p.request().query("SELECT COUNT(*) AS cnt FROM
+dbo.[Policy]");
+const claims = await p.request().query("SELECT COUNT(*) AS cnt FROM
+dbo.[Claim]");
+const byStatus = await p.request().query(`
+SELECT cs.name AS status, COUNT(*) AS cnt
+FROM dbo.[Claim] c
+JOIN dbo.[ClaimStatus] cs ON cs.id = c.statusId
+GROUP BY cs.name
+ORDER BY cs.name
+`);
+res.json({
+users: users.recordset[0].cnt,
+pets: pets.recordset[0].cnt,
+policies: policies.recordset[0].cnt,
+
+claims: claims.recordset[0].cnt,
+claimsByStatus: byStatus.recordset
+});
+} catch (e) {
+res.status(500).json({ error: e.message });
+}
+});
+
+app.patch("/api/admin/users/:id/role", async (req, res) => {
+const id = Number(req.params.id);
+const { roleId } = req.body || {};
+if (!Number.isInteger(id)) return badRequest(res, "id must be integer");
+if (!roleId) return badRequest(res, "roleId is required");
+try {
+const p = await getPool();
+const user = await p.request().input("id", sql.Int, id)
+.query("SELECT id FROM dbo.[User] WHERE id=@id");
+if (user.recordset.length === 0) return notFound(res, "User not found");
+const role = await p.request().input("rid", sql.Int, roleId)
+.query("SELECT id FROM dbo.[Role] WHERE id=@rid");
+if (role.recordset.length === 0) return badRequest(res, "roleId not found");
+const upd = await p.request()
+.input("id", sql.Int, id)
+.input("roleId", sql.Int, roleId)
+.query(`
+UPDATE dbo.[User]
+SET roleId=@roleId
+OUTPUT INSERTED.*
+WHERE id=@id
+`);
+res.json(upd.recordset[0]);
+} catch (e) {
+res.status(500).json({ error: e.message });
+}
+});
+
+start();
+
+2.3 Перевірка допустимості переходу статусу
+const allowed = ALLOWED_TRANSITIONS[currentStatus] || [];
+if (!allowed.includes(newStatus)) {
+return badRequest(res, `Invalid transition: ${currentStatus} -> ${newStatus}`);
+}
+
+Перед зміною статусу система перевіряє, чи дозволений перехід між
+поточним та новим статусами.
+Якщо перехід заборонений, сервер повертає повідомлення про помилку.
+Це забезпечує логічну послідовність обробки страхових випадків.
+
+3 UML ДІАГРАМИ
+У даній роботі побудовано UML-діаграму діяльності, що відображає
+процес зміни статусу страхового випадку. Діаграма демонструє основні етапи:
+валідацію вхідних даних, отримання поточного статусу із бази даних,
+перевірку дозволеності переходу, пошук нового статусу та оновлення запису в
+БД. У разі порушення бізнес-правил система повертає повідомлення про
+помилку.
+
+Рисунок 3.1 – UML діаграма діяльності процесу зміни статусу страхового
+випадку
+На рисунку 3.1 представлено UML-діаграму діяльності процесу
+зміни статусу страхового випадку (Claim) із перевіркою дозволених переходів.
+Процес починається з отримання сервером HTTP-запиту PATCH
+/api/claims/{id}/status, який містить ідентифікатор страхового випадку та новий
+статус.
+Спочатку система перевіряє коректність вхідних даних. Якщо дані
+некоректні, повертається помилка 400 Bad Request.
+Далі виконується пошук страхового випадку в базі даних. Якщо запис
+відсутній, система повертає помилку 404 Claim not found.
+Якщо страховий випадок існує, система визначає його поточний статус
+та перевіряє допустимість переходу до нового статусу відповідно до
+встановлених бізнес-правил.
+Якщо перехід заборонений, повертається помилка 400 Invalid transition.
+У разі дозволеного переходу система перевіряє існування нового статусу
+в довіднику статусів. Якщо статус не знайдено, повертається помилка 400
+newStatus not found.
+Якщо всі перевірки успішні, виконується оновлення статусу страхового
+випадку в базі даних, після чого сервер повертає відповідь 200 OK з
+оновленими даними.
+Дана діаграма демонструє логіку контролю переходів між статусами та
+забезпечує коректність обробки страхових випадків.
+
+Рисунок 3.2 – UML діаграма взаємодії створення страхового випадку з
+перевіркою активності поліса
+UML-діаграма взаємодії (послідовності) відображає процес створення
+страхового випадку. Спочатку клієнт надсилає запит на створення заявки, після
+чого сервер викликає бізнес-логіку перевірки активності поліса. У разі
+успішної перевірки відбувається створення запису Claim у базі даних та
+повернення відповіді клієнту.
+На рисунку 3.2 представлено UML-діаграму взаємодії, що відображає процес
+створення страхового випадку (Claim) з перевіркою активності страхового
+поліса.
+
+Процес починається з надсилання клієнтом HTTP-запиту POST /api/claims,
+який містить опис страхового випадку та ідентифікатор поліса.
+Серверна частина системи (Express API) передає запит до сервісу бізнес-логіки
+assertPolicyActive(), який виконує перевірку поліса.
+Сервіс звертається до бази даних SQL Server для отримання інформації про
+поліс, зокрема дат початку та завершення його дії.
+Далі можливі три варіанти розвитку подій:
+1. Поліс не знайдено.
+Якщо запис відсутній у базі даних, сервіс генерує помилку 404 Policy not found,
+яка повертається клієнту.
+2. Поліс неактивний.
+Якщо термін дії поліса завершився або ще не настав, система повертає
+помилку 400 Policy is not active, і створення страхового випадку не
+відбувається.
+3. Поліс активний.
+Якщо поліс дійсний, сервер виконує додавання нового запису до таблиці Claim
+зі статусом NEW. Після успішного створення запису клієнту повертається
+відповідь 201 Created разом із даними створеного страхового випадку.
+Дана діаграма демонструє взаємодію між клієнтом, серверною логікою та
+базою даних, а також підтверджує реалізацію бізнес-правила перевірки
+активності поліса.
+
+
